@@ -5,16 +5,18 @@ Scenario: Successful flight booking
     When User enters flight details
         | Female |
         | Male   |
-    And User proceeds to payment
+    And User enter years or expiriance
+    |5|
+    |7|
     Then User receives a booking confirmation
 
 Scenario Outline: Successful flight booking with different data
     Given User is on the flight booking page
     When User enters flight details "<gender>"
-    And User proceeds to payment
+    And User enter years or expiriance <years>
     Then User receives a booking confirmation
 
     Examples:
-    | gender |
-    | Female |
-    | Male   |
+    | gender |years|
+    | Female |2|
+    | Male   |5|

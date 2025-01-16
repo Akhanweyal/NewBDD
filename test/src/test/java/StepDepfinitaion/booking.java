@@ -5,17 +5,25 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import io.cucumber.datatable.DataTable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 public class booking {
     private WebDriver driver;
+
     @Before
     public void beforehock() {
         System.setProperty("webdriver.edge.driver", "C:\\Users\\18042\\msedgedriver.exe");
         driver = new EdgeDriver();
     }
+
     @After
     public void afterhock() {
         if (driver != null) {
@@ -70,6 +78,10 @@ public class booking {
         List<WebElement> radios = driver.findElements(By.xpath("//input[@name='sex']"));
         for (WebElement radio : radios) {
             if (radio.getAttribute("value").equalsIgnoreCase(gender)) {
+                // Scroll the element into view
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", radio);
+//                // Remove the blocking iframe
+//                ((JavascriptExecutor) driver).executeScript("document.getElementById('google_ads_iframe_/1254144,22662382379/techlistic_com-medrectangle-2_0').remove();");
                 radio.click();
                 System.out.println(gender + " radio button is selected");
                 break;
@@ -77,11 +89,31 @@ public class booking {
         }
     }
 
-    @And("User proceeds to payment")
-    public void userProceedsToPayment() {
-        // Code to proceed to payment
+    @And("User enter years or expiriance")
+    public void userExpiriance(DataTable dataTable) {
+        List<String> years = dataTable.asList(String.class);
+        for (String year : years) {
+            enterYears(year);
+            System.out.println("Years of expiriance was clicked from data table");
+//            WebDriverWait wait = new WebDriverWait(driver, 10);
+//            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='exp']")));
+        }
     }
-
+    @And("User enter years or expiriance {int}")
+    public void userExpiriance(String year){
+        enterYears(year);
+    }
+    private void enterYears(String year) {
+       List<WebElement> yearsOfExp = driver.findElements(By.xpath("//input[@name='exp']"));
+        yearsOfExp.clear();
+        for (WebElement yearOfExp : yearsOfExp) {
+                yearOfExp.click();
+                System.out.println(year + " radio button is selected");
+    
+                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+                break;
+        }
+    }
     @Then("User receives a booking confirmation")
     public void userReceivesBookingConfirmation() {
         // Code to verify booking confirmation
