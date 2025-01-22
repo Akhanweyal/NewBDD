@@ -4,6 +4,10 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import io.cucumber.datatable.DataTable;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -95,27 +99,46 @@ public class booking {
         for (String year : years) {
             enterYears(year);
             System.out.println("Years of expiriance was clicked from data table");
-//            WebDriverWait wait = new WebDriverWait(driver, 10);
-//            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='exp']")));
         }
     }
+
     @And("User enter years or expiriance {int}")
-    public void userExpiriance(String year){
-        enterYears(year);
+    public void userExpiriance(int year) {
+        enterYears(String.valueOf(year));
     }
+
     private void enterYears(String year) {
-       List<WebElement> yearsOfExp = driver.findElements(By.xpath("//input[@name='exp']"));
-        yearsOfExp.clear();
-        for (WebElement yearOfExp : yearsOfExp) {
-                yearOfExp.click();
-                System.out.println(year + " radio button is selected");
-    
-                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-                break;
+        // Deselect all radio buttons first
+        List<WebElement> yearsOfExpRadios = driver.findElements(By.xpath("//input[@name='exp']"));
+        for (WebElement radio : yearsOfExpRadios) {
+            if (radio.isSelected()) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].checked = false;", radio);
+            }
         }
+
+        // Adjust the locator for the special case where year is 7 or above
+        String adjustedYear = year.equals("7") ? "6" : year;
+
+        // Wait for the desired radio button to be present
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebElement yearsOfExp = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@id='exp-" + adjustedYear + "']")));
+
+        // Debugging information
+        System.out.println("Attempting to click on the radio button with id: exp-" + adjustedYear);
+
+        // Select the desired radio button
+        yearsOfExp.click();
+        System.out.println(year + " years of experience radio button is selected");
     }
-    @Then("User receives a booking confirmation")
-    public void userReceivesBookingConfirmation() {
-        // Code to verify booking confirmation
+
+    @Then("User enter date of the booking.")
+    public void user_enter_date_of_the_booking() {
+    LocalDateTime now = LocalDateTime.now();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+    String dateTime = now.format(formatter);
+    System.out.println("Current date and time is: " + dateTime);
+    WebElement dateField = driver.findElement(By.id("datepicker"));
+    dateField.clear();
+    dateField.sendKeys(dateTime);
     }
 }
