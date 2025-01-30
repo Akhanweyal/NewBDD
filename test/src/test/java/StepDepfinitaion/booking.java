@@ -6,7 +6,6 @@ import io.cucumber.java.en.*;
 import io.cucumber.datatable.DataTable;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +25,8 @@ public class booking {
     public void beforehock() {
         System.setProperty("webdriver.edge.driver", "C:\\Users\\18042\\msedgedriver.exe");
         driver = new EdgeDriver();
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
     @After
@@ -133,12 +134,37 @@ public class booking {
 
     @Then("User enter date of the booking.")
     public void user_enter_date_of_the_booking() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
-    String dateTime = now.format(formatter);
-    System.out.println("Current date and time is: " + dateTime);
-    WebElement dateField = driver.findElement(By.id("datepicker"));
-    dateField.clear();
-    dateField.sendKeys(dateTime);
+        LocalDate todaysdate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        String date = todaysdate.format(formatter);
+        System.out.println("Today's date is: " + date);
+        WebElement dateField = driver.findElement(By.id("datepicker"));
+        dateField.clear();
+        dateField.sendKeys(date);
+    
+    }
+    @And("User select profission type")
+    public void user_select_profission_type(DataTable dataTable){
+        List<String> profission = dataTable.asList(String.class);
+        for (String profissionType: profission){
+            selectProfission(profissionType);
+        }
+    }
+    @And("User select profission type {string}")
+    public void user_select_profission_type(String profissionType){
+        selectProfission(profissionType);
+    }
+    private void selectProfission(String profissionType){
+        List<WebElement> profissionTypes = driver.findElements(By.xpath("//input[@name='profession']"));
+        for (WebElement profission: profissionTypes){
+            if (profission.getAttribute("value").equalsIgnoreCase(profissionType)){
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", profission);
+                profission.click();
+                System.out.println(profissionType + " radio button is selected");
+                break;
+            }
+        }
     }
 }
+
+ 
